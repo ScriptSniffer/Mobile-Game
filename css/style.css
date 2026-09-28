@@ -1,0 +1,1354 @@
+/* ==========================================================================
+   Cookie Clicker Light – Styles
+   Dunkles, modernes Design · responsive (Handy & Desktop) · keine Abhängigkeiten
+
+   Inhalt:
+     1. Design-Tokens
+     2. Basis
+     3. Layout
+     4. Kopfzeile & News-Ticker
+     5. Backstube (großer Keks, Strahlen, Effekte)
+     6. Goldene Kekse & Boni
+     7. Shop (Upgrades & Gebäude)
+     8. Fußzeile & Buttons
+     9. Toasts
+    10. Dialoge & Statistik
+    11. Animationen
+    12. Responsive Anpassungen
+   ========================================================================== */
+
+/* ---------- 1. Design-Tokens ---------- */
+:root {
+  --bg: #0c0e13;
+  --bg-elevated: #12151d;
+  --panel: #151922;
+  --panel-2: #1b202b;
+  --panel-3: #232937;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.14);
+
+  --text: #f1ece4;
+  --muted: #959cab;
+  --accent: #f5b45e;        /* Keks-Gold */
+  --accent-strong: #ff9f43;
+  --accent-ink: #2b1705;    /* Text auf Akzentflächen */
+  --gold: #ffd54a;
+  --success: #7ddc97;
+  --danger: #ff6b6b;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --font: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+
+  /* Werden während einer Raserei goldener */
+  --ray-color: rgba(255, 222, 160, 0.085);
+  --glow-color: rgba(255, 186, 104, 0.3);
+
+  color-scheme: dark;
+}
+
+/* ---------- 2. Basis ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  overscroll-behavior: none;          /* kein „Pull to refresh“ beim wilden Klicken */
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- 3. Layout ---------- */
+.app {
+  height: 100vh;
+  height: 100dvh; /* berücksichtigt ein- und ausfahrende Browserleisten auf dem Handy */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  /* Feste Bereiche statt Auto-Platzierung: bleibt korrekt, auch wenn der Ticker ausgeblendet ist */
+  grid-template-areas: "top" "ticker" "play" "footer";
+}
+
+.topbar { grid-area: top; }
+.ticker { grid-area: ticker; }
+.play { grid-area: play; }
+.footer { grid-area: footer; }
+
+.play {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  min-height: 0;
+}
+
+/* ---------- 4. Kopfzeile & News-Ticker ---------- */
+.topbar {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-areas: "cookies name cps";
+  align-items: center;
+  gap: 6px 16px;
+  padding: 12px max(20px, env(safe-area-inset-right)) 12px max(20px, env(safe-area-inset-left));
+  padding-top: max(12px, env(safe-area-inset-top));
+  background: linear-gradient(180deg, #181c27 0%, #12151d 100%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stat--cookies {
+  grid-area: cookies;
+}
+
+.stat--cps {
+  grid-area: cps;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.stat__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stat__value {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(1.4rem, 3.4vw, 2.3rem);
+  font-weight: 900;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: color 0.3s, text-shadow 0.3s;
+}
+
+.stat--cookies .stat__value {
+  color: var(--accent);
+  text-shadow: 0 0 24px rgba(245, 180, 94, 0.25);
+}
+
+.stat__value.is-boosted {
+  color: var(--gold);
+  text-shadow: 0 0 18px rgba(255, 213, 74, 0.6);
+}
+
+.bakery-name {
+  grid-area: name;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 6px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.bakery-name__text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.bakery-name__edit {
+  font-size: 0.85em;
+  opacity: 0.45;
+  transition: opacity 0.2s;
+}
+
+.bakery-name:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--border-strong);
+}
+
+.bakery-name:hover .bakery-name__edit {
+  opacity: 1;
+}
+
+.ticker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  padding: 0 16px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid var(--border);
+  color: #d2cabd;
+  font-size: 0.9rem;
+  font-style: italic;
+  text-align: center;
+}
+
+.ticker p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.ticker p.is-changing {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+/* ---------- 5. Backstube ---------- */
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  container-type: size; /* Keksgröße passt sich per cqmin an die Fläche an */
+  background:
+    radial-gradient(ellipse at 50% 46%, rgba(245, 180, 94, 0.1), transparent 62%),
+    radial-gradient(circle at 15% 90%, rgba(96, 120, 255, 0.07), transparent 45%),
+    linear-gradient(180deg, #121622 0%, #0d1018 100%);
+  border-right: 1px solid var(--border);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.rain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.cookie-wrap {
+  position: relative;
+  z-index: 1;
+  width: min(62vmin, 340px);
+  width: min(70cqmin, 400px);
+  aspect-ratio: 1;
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* Warmes Leuchten hinter dem Keks */
+.cookie-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -28%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow-color) 0%, transparent 62%);
+  pointer-events: none;
+  transition: background 0.6s;
+}
+
+/* Rotierende Lichtstrahlen */
+.rays {
+  position: absolute;
+  inset: -70%;
+  z-index: -2;
+  background: repeating-conic-gradient(from 0deg, var(--ray-color) 0deg 8deg, transparent 8deg 20deg);
+  -webkit-mask-image: radial-gradient(circle, #000 22%, transparent 66%);
+  mask-image: radial-gradient(circle, #000 22%, transparent 66%);
+  animation: spin 60s linear infinite;
+  pointer-events: none;
+}
+
+.big-cookie {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation; /* kein Doppeltipp-Zoom */
+  filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.55));
+  transition: transform 0.2s cubic-bezier(0.3, 1.6, 0.5, 1), filter 0.4s;
+}
+
+.big-cookie svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.big-cookie.is-pressed {
+  transform: scale(0.95);
+  transition-duration: 0.06s;
+}
+
+.big-cookie:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 8px;
+}
+
+@media (hover: hover) {
+  .big-cookie:hover:not(.is-pressed) {
+    transform: scale(1.04);
+  }
+}
+
+.per-click {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  z-index: 2;
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Ebene für Schwebetexte & Krümel */
+.fx-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.float-text {
+  position: absolute;
+  color: #fff;
+  font-size: clamp(1rem, 5cqmin, 1.5rem);
+  font-weight: 900;
+  white-space: nowrap;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+  transform: translate(-50%, -50%);
+  animation: float-up 1s ease-out forwards;
+}
+
+.float-text--gold {
+  color: var(--gold);
+  font-size: clamp(1.1rem, 6cqmin, 1.8rem);
+  text-shadow: 0 0 12px rgba(255, 190, 40, 0.7), 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.crumb {
+  position: absolute;
+  width: var(--size, 7px);
+  height: var(--size, 7px);
+  margin: calc(var(--size, 7px) / -2) 0 0 calc(var(--size, 7px) / -2);
+  border-radius: 45% 55% 40% 60%;
+  background: #c98a45;
+  box-shadow: inset -1px -1px 0 rgba(0, 0, 0, 0.25);
+  animation: crumb-fly 0.75s cubic-bezier(0.15, 0.7, 0.35, 1) forwards;
+}
+
+/* Raserei: alles wird golden */
+.stage.is-frenzy {
+  --ray-color: rgba(255, 213, 74, 0.2);
+  --glow-color: rgba(255, 205, 60, 0.45);
+}
+
+.stage.is-click-frenzy .big-cookie {
+  filter: drop-shadow(0 0 26px rgba(255, 213, 74, 0.85));
+}
+
+/* ---------- 6. Goldene Kekse & Boni ---------- */
+.golden-cookie {
+  position: absolute;
+  z-index: 5;
+  width: clamp(56px, 17cqmin, 96px);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  filter: drop-shadow(0 0 14px rgba(255, 210, 60, 0.9));
+  transform: translate(-50%, -50%);
+  animation:
+    golden-in 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) both,
+    golden-bob 2.4s ease-in-out 0.5s infinite;
+}
+
+.golden-cookie svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: spin 9s linear infinite;
+  pointer-events: none;
+}
+
+.golden-cookie.is-leaving {
+  animation: golden-out 0.6s ease-in forwards;
+  pointer-events: none;
+}
+
+.buffs {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  left: 10px;
+  z-index: 7;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.buff {
+  position: relative;
+  overflow: hidden;
+  padding: 5px 12px 7px;
+  border: 1px solid rgba(255, 213, 74, 0.5);
+  border-radius: 999px;
+  background: rgba(40, 32, 8, 0.85);
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 800;
+  box-shadow: 0 0 18px rgba(255, 213, 74, 0.25);
+  animation: pop-in 0.3s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.buff__bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--gold);
+  transition: width 0.25s linear;
+}
+
+/* ---------- 7. Shop ---------- */
+.shop {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+}
+
+.shop__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.shop__title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-elevated);
+}
+
+.segmented button {
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.segmented button.is-active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.shop__scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 12px 12px max(20px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--panel-3) transparent;
+  scrollbar-width: thin;
+}
+
+.shop-section + .shop-section {
+  margin-top: 18px;
+}
+
+.shop-section__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 8px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pill {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(245, 180, 94, 0.15);
+  color: var(--accent);
+  font-size: 0.72rem;
+  letter-spacing: 0;
+}
+
+.pill:empty {
+  display: none;
+}
+
+.empty-hint {
+  margin: 0;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Gemeinsame Basis für Upgrade- und Gebäude-Karten */
+.upgrade,
+.building {
+  display: grid;
+  align-items: center;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--panel-2), #181c26);
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.12s, border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.upgrade.is-affordable,
+.building.is-affordable {
+  border-color: rgba(245, 180, 94, 0.45);
+  box-shadow: 0 0 0 1px rgba(245, 180, 94, 0.12), 0 6px 22px rgba(245, 180, 94, 0.08);
+}
+
+.upgrade.is-expensive,
+.building.is-expensive {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.upgrade.is-affordable:active,
+.building.is-affordable:active {
+  transform: scale(0.98);
+}
+
+@media (hover: hover) {
+  .upgrade.is-affordable:hover,
+  .building.is-affordable:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+}
+
+/* Upgrades */
+.upgrade-list {
+  display: grid;
+  gap: 8px;
+}
+
+.upgrade {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 8px 12px 8px 8px;
+}
+
+.upgrade.is-new {
+  animation: new-glow 1.6s ease-out;
+}
+
+.upgrade__icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 22px;
+}
+
+/* Stufen-Abzeichen (I–V) bei Gebäude-Upgrades */
+.upgrade__icon[data-badge]::after {
+  content: attr(data-badge);
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  padding: 0 4px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.6rem;
+  font-weight: 900;
+  line-height: 1.5;
+}
+
+.upgrade__info {
+  min-width: 0;
+}
+
+.upgrade__name {
+  display: block;
+  overflow: hidden;
+  font-size: 0.92rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.upgrade__desc {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.upgrade__cost {
+  color: var(--success);
+  font-size: 0.85rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.upgrade.is-expensive .upgrade__cost {
+  color: var(--danger);
+}
+
+/* Gebäude */
+.building {
+  grid-template-columns: 50px minmax(0, 1fr) auto;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 10px 16px 10px 10px;
+}
+
+.building__icon {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 30px;
+}
+
+.building__info {
+  min-width: 0;
+}
+
+.building__name {
+  display: block;
+  overflow: hidden;
+  font-size: 1.05rem;
+  font-weight: 900;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.building__cost {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--success);
+  font-size: 0.88rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.building.is-expensive .building__cost {
+  color: var(--danger);
+}
+
+.building__meta {
+  display: block;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.74rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.building__meta:empty {
+  display: none;
+}
+
+.building__owned {
+  min-width: 1ch;
+  color: rgba(255, 255, 255, 0.22);
+  font-size: 2rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Noch unentdeckte Gebäude: Silhouette mit „???“ */
+.building.is-locked {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.building.is-locked .building__icon {
+  filter: grayscale(1) brightness(0);
+}
+
+.building.is-locked .building__cost {
+  color: var(--muted);
+}
+
+/* ---------- 8. Fußzeile & Buttons ---------- */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  background: #10131a;
+  border-top: 1px solid var(--border);
+}
+
+.btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  font-size: 0.9rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.footer .btn {
+  flex-shrink: 0;
+}
+
+.btn:hover {
+  background: var(--panel-3);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn--primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn--primary:hover {
+  background: var(--accent-strong);
+}
+
+.btn--danger {
+  border-color: rgba(255, 107, 107, 0.35);
+  background: rgba(255, 107, 107, 0.08);
+  color: var(--danger);
+}
+
+.btn--danger:hover {
+  background: rgba(255, 107, 107, 0.16);
+}
+
+.btn--danger-solid {
+  border-color: transparent;
+  background: var(--danger);
+  color: #2a0808;
+}
+
+.btn--danger-solid:hover {
+  background: #ff8585;
+}
+
+/* Füllt nur den Restplatz – darf die Mindestbreite der Fußzeile nicht erhöhen */
+.save-indicator {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+  color: var(--success);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.save-indicator.is-visible {
+  opacity: 1;
+}
+
+/* ---------- 9. Toasts ---------- */
+/* Liegt unten in der Backstube; Klicks gehen hindurch, damit man weiterklicken kann */
+.toasts {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(calc(100% - 24px), 380px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toast {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 10px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: rgba(22, 26, 35, 0.96);
+  box-shadow: var(--shadow);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: toast-in 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.toast.is-leaving {
+  animation: toast-out 0.3s ease-in forwards;
+}
+
+.toast--achievement {
+  border-color: rgba(245, 180, 94, 0.5);
+}
+
+.toast--gold {
+  border-color: rgba(255, 213, 74, 0.7);
+  box-shadow: var(--shadow), 0 0 24px rgba(255, 213, 74, 0.25);
+}
+
+.toast__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(245, 180, 94, 0.14);
+  font-size: 22px;
+}
+
+.toast__body {
+  min-width: 0;
+}
+
+.toast__title {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.toast--gold .toast__title {
+  color: var(--gold);
+}
+
+.toast__text {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.95rem;
+  font-weight: 800;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.toast__note {
+  display: block;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.toast__note:empty {
+  display: none;
+}
+
+.toast__close {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.toast__close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+/* ---------- 10. Dialoge & Statistik ---------- */
+.dialog {
+  width: min(92vw, 420px);
+  max-height: 88dvh;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+.dialog[open] {
+  animation: dialog-in 0.3s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+
+.dialog::backdrop {
+  background: rgba(5, 6, 10, 0.72);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+.dialog--wide {
+  width: min(94vw, 600px);
+}
+
+.dialog__body {
+  margin: 0;
+  padding: 24px;
+}
+
+.dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.dialog__icon {
+  margin-bottom: 8px;
+  font-size: 2.2rem;
+}
+
+.dialog__title {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.dialog__header .dialog__title {
+  margin: 0;
+}
+
+.dialog__text,
+.dialog__hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.dialog__hint {
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+}
+
+.dialog__subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 24px 0 4px;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel-2);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: var(--panel-3);
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.field__label {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.field__input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem; /* ≥ 16px verhindert Auto-Zoom auf iOS */
+  font-weight: 700;
+}
+
+.field__input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 16px;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  font-size: 0.92rem;
+}
+
+.stats-grid dt {
+  color: var(--muted);
+}
+
+.stats-grid dd {
+  margin: 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.achievements {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+}
+
+.achievement {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(245, 180, 94, 0.3);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+}
+
+.achievement.is-locked {
+  border-color: var(--border);
+  opacity: 0.5;
+}
+
+.achievement__icon {
+  font-size: 1.4rem;
+}
+
+.achievement.is-locked .achievement__icon {
+  filter: grayscale(1);
+}
+
+.achievement__text {
+  display: grid;
+  min-width: 0;
+}
+
+.achievement__text strong {
+  font-size: 0.82rem;
+}
+
+.achievement__text small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+/* ---------- 11. Animationen ---------- */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+
+@keyframes float-up {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.7); }
+  15% { opacity: 1; transform: translate(-50%, -70%) scale(1.15); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--drift, 0px)), -320%) scale(1); }
+}
+
+@keyframes crumb-fly {
+  to {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.5);
+  }
+}
+
+@keyframes golden-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0) rotate(-120deg); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes golden-bob {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -60%) scale(1.08); }
+}
+
+@keyframes golden-out {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes new-glow {
+  0% { box-shadow: 0 0 0 0 rgba(255, 213, 74, 0.8); transform: scale(0.96); }
+  30% { transform: scale(1.02); }
+  100% { box-shadow: 0 0 0 14px rgba(255, 213, 74, 0); transform: scale(1); }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toast-out {
+  to { opacity: 0; transform: translateY(10px) scale(0.95); }
+}
+
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Weniger Bewegung, wenn im System gewünscht */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- 12. Responsive Anpassungen ---------- */
+
+/* Handy (Hochformat): Keks oben, Shop darunter – beides gleichzeitig sichtbar */
+@media (max-width: 760px) {
+  .topbar {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "name name"
+      "cookies cps";
+    padding: 8px 14px 10px;
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+
+  .bakery-name {
+    padding: 3px 12px;
+    font-size: 0.88rem;
+  }
+
+  .stat__label {
+    font-size: 0.66rem;
+  }
+
+  .ticker {
+    height: 38px;
+    padding: 0 12px;
+    font-size: 0.78rem;
+  }
+
+  .play {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(200px, 42%) minmax(0, 1fr);
+  }
+
+  .stage {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cookie-wrap {
+    width: min(72cqmin, 340px);
+  }
+
+  .per-click {
+    bottom: 8px;
+    font-size: 0.72rem;
+  }
+
+  .shop__header {
+    padding: 10px 12px 8px;
+  }
+
+  .shop__title {
+    font-size: 1.1rem;
+  }
+
+  .shop__scroll {
+    padding: 10px 10px max(16px, env(safe-area-inset-bottom));
+  }
+
+  .building {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 8px 12px 8px 8px;
+  }
+
+  .building__icon {
+    width: 42px;
+    height: 42px;
+    font-size: 25px;
+  }
+
+  .building__name {
+    font-size: 0.98rem;
+  }
+
+  .building__owned {
+    font-size: 1.6rem;
+  }
+
+  .footer {
+    padding: 8px 12px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .btn {
+    padding: 7px 12px;
+    font-size: 0.82rem;
+  }
+
+  /* Auf kleinen Displays: kompakter und höchstens zwei Toasts gleichzeitig */
+  .toasts {
+    bottom: 38px;
+    gap: 6px;
+  }
+
+  .toast {
+    gap: 10px;
+    padding: 7px 8px 7px 10px;
+  }
+
+  .toast:nth-last-child(n + 3) {
+    display: none;
+  }
+
+  .toast__icon {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .toast__title {
+    font-size: 0.64rem;
+  }
+
+  .toast__text {
+    font-size: 0.85rem;
+  }
+
+  .toast__note {
+    font-size: 0.7rem;
+  }
+
+  .dialog__body {
+    padding: 20px;
+  }
+}
+
+/* Sehr kleine Höhen (z. B. Handy im Querformat): Platz sparen */
+@media (max-height: 560px) {
+  .ticker {
+    display: none;
+  }
+
+  .topbar {
+    padding-top: max(6px, env(safe-area-inset-top));
+    padding-bottom: 6px;
+  }
+
+  .stat__value {
+    font-size: 1.3rem;
+  }
+}

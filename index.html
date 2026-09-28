@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Cookie Clicker Light – backe Kekse, kaufe Gebäude und baue dein Keks-Imperium. Läuft direkt im Browser, auf Handy und Desktop.">
+  <meta name="theme-color" content="#0c0e13">
+  <meta name="color-scheme" content="dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cookie Light">
+  <title>Cookie Clicker Light</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%AA%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+
+    <!-- Kopfzeile: Keks-Zähler (links) · Bäckerei-Name (Mitte) · Kekse pro Sekunde (rechts) -->
+    <header class="topbar">
+      <div class="stat stat--cookies">
+        <span class="stat__label">🍪 Kekse</span>
+        <span class="stat__value" id="cookieCount">0</span>
+      </div>
+
+      <button type="button" class="bakery-name" id="bakeryName" title="Bäckerei umbenennen">
+        <span class="bakery-name__text" id="bakeryNameText">Meine Bäckerei</span>
+        <span class="bakery-name__edit" aria-hidden="true">✎</span>
+      </button>
+
+      <div class="stat stat--cps">
+        <span class="stat__label">⚡ pro Sekunde</span>
+        <span class="stat__value" id="cpsCount">0</span>
+      </div>
+    </header>
+
+    <!-- News-Ticker: erzählt die Geschichte deiner Bäckerei -->
+    <div class="ticker">
+      <p id="newsText"></p>
+    </div>
+
+    <main class="play">
+
+      <!-- Backstube: großer Keks, goldene Kekse, Effekte -->
+      <section class="stage" id="stage" aria-label="Backstube">
+        <canvas class="rain" id="rainCanvas" aria-hidden="true"></canvas>
+        <div class="buffs" id="buffs" aria-live="polite"></div>
+
+        <div class="cookie-wrap">
+          <div class="rays" aria-hidden="true"></div>
+          <!-- Die Keks-Grafik wird per JavaScript als SVG eingefügt -->
+          <button type="button" class="big-cookie" id="bigCookie" aria-label="Keks backen"></button>
+        </div>
+
+        <p class="per-click" id="perClick">+1 pro Klick</p>
+        <div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
+
+        <!-- Benachrichtigungen (Erfolge, goldene Kekse, …) – Klicks gehen hindurch -->
+        <div class="toasts" id="toasts" aria-live="polite"></div>
+      </section>
+
+      <!-- Shop: Upgrades & Gebäude -->
+      <aside class="shop" aria-labelledby="shopTitle">
+        <div class="shop__header">
+          <h2 class="shop__title" id="shopTitle">Shop</h2>
+          <div class="segmented" id="buyAmount" role="group" aria-label="Kaufmenge">
+            <button type="button" data-amount="1">×1</button>
+            <button type="button" data-amount="10">×10</button>
+            <button type="button" data-amount="100">×100</button>
+          </div>
+        </div>
+
+        <div class="shop__scroll">
+          <section class="shop-section" aria-labelledby="upgradesTitle">
+            <h3 class="shop-section__title" id="upgradesTitle">
+              Upgrades <span class="pill" id="upgradeCount"></span>
+            </h3>
+            <div class="upgrade-list" id="upgradeList"></div>
+          </section>
+
+          <section class="shop-section" aria-labelledby="buildingsTitle">
+            <h3 class="shop-section__title" id="buildingsTitle">Gebäude</h3>
+            <div class="building-list" id="buildingList"></div>
+          </section>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Fußzeile -->
+    <footer class="footer">
+      <button type="button" class="btn" id="statsBtn">📊 Statistik</button>
+      <span class="save-indicator" id="saveIndicator">✓ Gespeichert</span>
+      <button type="button" class="btn btn--danger" id="newGameBtn">↺ Neues Spiel</button>
+    </footer>
+  </div>
+
+  <!-- Dialog: Neues Spiel bestätigen -->
+  <dialog class="dialog" id="confirmDialog" aria-labelledby="confirmTitle">
+    <form method="dialog" class="dialog__body">
+      <div class="dialog__icon" aria-hidden="true">🗑️</div>
+      <h2 class="dialog__title" id="confirmTitle">Neues Spiel starten?</h2>
+      <p class="dialog__text">
+        Dein gesamter Fortschritt – Kekse, Gebäude, Upgrades und Erfolge – wird gelöscht.
+        Das kann nicht rückgängig gemacht werden.
+      </p>
+      <div class="dialog__actions">
+        <button type="button" class="btn" data-close>Abbrechen</button>
+        <button type="submit" class="btn btn--danger-solid" value="confirm">Neu starten</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Dialog: Bäckerei umbenennen -->
+  <dialog class="dialog" id="renameDialog" aria-labelledby="renameTitle">
+    <form method="dialog" class="dialog__body">
+      <div class="dialog__icon" aria-hidden="true">🏪</div>
+      <h2 class="dialog__title" id="renameTitle">Bäckerei umbenennen</h2>
+      <label class="field">
+        <span class="field__label">Wie soll deine Bäckerei heißen?</span>
+        <input class="field__input" type="text" id="renameInput" maxlength="30" autocomplete="off" spellcheck="false">
+      </label>
+      <div class="dialog__actions">
+        <button type="button" class="btn" data-close>Abbrechen</button>
+        <button type="submit" class="btn btn--primary" value="save">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Dialog: Statistik & Erfolge -->
+  <dialog class="dialog dialog--wide" id="statsDialog" aria-labelledby="statsTitle">
+    <div class="dialog__body">
+      <div class="dialog__header">
+        <h2 class="dialog__title" id="statsTitle">📊 Statistik</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Schließen">✕</button>
+      </div>
+      <dl class="stats-grid" id="statsGrid"></dl>
+
+      <h3 class="dialog__subtitle">🏆 Erfolge <span class="pill" id="achievementCount"></span></h3>
+      <p class="dialog__hint">Jeder freigeschaltete Erfolg erhöht deine Keks-Produktion dauerhaft um 1 %.</p>
+      <div class="achievements" id="achievementList"></div>
+    </div>
+  </dialog>
+
+  <script src="js/config.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
